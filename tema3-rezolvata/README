@@ -1,0 +1,120 @@
+
+			Homework 3 - POO
+				Lidia Istrate 325CD
+
+				cachingSystem
+
+ObservableCache 
+	- i added 2 instances , stalePolicy and cacheListener to be used with the setters
+	- i created a method getListener() to be used in the caches that 
+	inherit the ObservableCache
+	- clearStaleEntries() gets the eldest entry and uses the stalePolicy 
+	to decide whether it should be removed
+
+
+ObservableFIFOCache 
+	- a FIFOCache is used by composition
+	- for the get method , there are 2 cases :
+		* the key is in the cache , the onHit will be called
+		* the key is not in the cache , the onHit and onMiss will be called
+	- for the put method , the onPut is called and the clearStaleEntries()
+	 which makes sure the capacity is not exceeded
+	- the rest of the methods just call the fifoCache methods
+
+
+LRUCache
+	- guarantees O(1) complexity for the get , put and remove operations 
+	- it uses a hashmap for the key and the Node , because the connections 
+	between a node with a prev and a next can be easily modified, this reducing the complexity 
+	- it uses a DoublyLinkedList which i implemented in the dataStructures folder 
+	- for the get method there are 2 cases : 
+		* the key is in the cache , the onHit will be called 
+		i get the node from the cache, move it first in the linked list 
+	(because it is now most recently used) and i put in the cache the node that 
+	resulted from the moveFirst operations 
+		* the key is not in the cache , is the same as the previous 
+	case but the onMiss is called first
+	- for the put method there are 2 cases :
+		* the key is in the cache so i get the node , i change it's value , 
+	move it first in the list , put the new node in the cache and exit the function
+		* the key is not in the cache , i create a new node and add it
+		 at the front of the list , i put it into the cache and if after 
+		the clear stale entries , the size has been decreased ,
+		 i remove the last element of the linked list
+	- for the getEldestEntry method , i use the getLru() method from the list 
+		, which returns the tail
+
+
+TimeAwareCache
+	- it uses a hashmap of key and timestamp to keep track of the 
+		timestamps of each key in the cache 
+	- i created a method , addTimestamps(key) to add a new timestamp 
+		(regarding the current time) to the hashmap
+	- for the get method there are 2 cases : 
+		* if the key is in the cache i call the clearStaleEntries 
+		method cache.size() times, so in case every entry has expired , 
+		it is removed from the cache / while doing this , i keep track 
+		of how many elements have been removed , and i removeLast from list that many times 
+		the onHit is called and i add a timestamp , and i check if the key 
+		is still in the cache , and if not i call onMiss
+		* if the key is not in the cache , i do the same check with the 
+		clearStaleEntries,  and call the onHit and onMiss
+	- for the put method there are 2 cases :
+		* the key is in the cache 
+		* the key is not in the cache and a new entry needs to be created
+	- for the getEldestEntry method , i use the getLru() method from the list 
+		, which returns the tail
+	- for the setExpirePolicy , if the difference between the currentTime and
+		 the time of the entry (the time when it has been added to the hashmap) 
+		is greater than millisToExpire , shouldRemoveEldestEntry returns true , else false 
+
+FileCache
+	- i try to read with a buffered reader the contents of the file and i put it into the cache
+
+
+				dataStructures
+
+
+DoublyLinkedList
+	- uses a head , a tail and size
+	- the important methods are : getLRU() , add , remove , moveFirst , removeLast
+
+Node 
+	- uses a key , value , next, prev 
+
+	
+
+				observerPattern
+
+BroadcastListener
+	- it keeps a list of listeners and for each one in the list , in the onPut 
+		method , it applies it 
+
+
+KeyStatsListener
+	- it uses a linkedhashmap of key and an arraylist , in the arraylist , on 
+		position 0 i keep the number of misses for the key , on position 1 , 
+		the number of hits for the key and on position 2 the number of updates for the key 
+	- onHit , i use the setKeyStatsHits , which adds 1 to the number of hits for the key 
+		, similarily for the onMiss and onPut
+	- getTopHitKeys : i create entryes of keys and number of hits for each key 
+		and put them all in a treemap
+	with the function sortByValue, i sort it in descending order , and then get the topHits 
+		, and topHitsCount only takes the first top choices
+	- similarly for the getTopMissedKeps and getTopUpdatedKeys
+
+
+StatsListener 
+	- i use 3 ints : hits, misses, updates 
+	- onPut i increase number of updates
+	- onMiss i increase number of misses
+	- onHit i increase number of hits
+
+	
+
+
+
+
+
+
+
